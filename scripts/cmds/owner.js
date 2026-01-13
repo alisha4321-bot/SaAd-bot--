@@ -22,10 +22,10 @@ module.exports = {
 │ 🧸 Nɪᴄᴋ       : 𝚂𝙰𝙰𝙳
 │ 🎂 Aɢᴇ        : 19+
 │ 💘 Rᴇʟᴀᴛɪᴏɴ : Sɪɴɢʟᴇ
-│ 📑profession : Sᴛᴜᴅᴇɴᴛ
+│ 🏠 Sinajgong Bangladesh 
 ├─ 🔗 Cᴏɴᴛᴀᴄᴛ ─╮
 │ 📘 Facebook  :https://www.facebook.com/share/185KUbutjn/
-│ 🌐𝙳𝙴𝚅𝙸𝙽𝙵𝙾
+│ 🌐𝙳𝙴𝚅 𝙸𝙽𝙵𝙾
 │ 𝚆𝙰𝚂𝙷𝙸𝙺 𝙰𝙳𝙽𝙰𝙽
 ╰────────────────╯`;
 
@@ -34,7 +34,7 @@ module.exports = {
 
     if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir);
 
-    const imgLink = "https://i.imgur.com/1G4ZhU7.jpeg";
+    const imgLink = "https://i.imgur.com/rCKGqV8.jpeg";
 
     const send = () => {
       api.sendMessage(
