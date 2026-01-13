@@ -12,27 +12,27 @@
   "antiInbox": false,
   "language": "en",
   "notesLanguage": "change language using ISO 639-1 code",
-  "nickNameBot": "♡┋Տʜɪᴢᴜᴋꫝㅤᥫ᭡",
+  "nickNameBot": "🎀𝑴𝒆𝒕𝒂 𝑨𝒊 𝒈𝒐𝒌 𝒈𝒐𝒌 𝒗𝒆𝒓𝒔𝒊𝒐𝒏🎀",
   "prefix": "/",
   "adminOnly": {
     "enable": false,
     "ignoreCommand": []
   },
   "adminBot": [
-    "100078049308655",
-    "61577213967981"
+    "61574715983842",
+    "61550670293729"
   ],
   "reactUnsend": {
     "enable": true,
     "onlyAdmin": true,
-    "emojis": ["😡", "🤬"],
+    "emojis": ["🐸", "🤬"],
     "notes": "If enable = true, bot will unsend any message reacted with these emojis. If onlyAdmin = true, only adminBot IDs can trigger it."
   },
   "whiteListMode": {
     "enable": false,
     "whiteListIds": [
-      "100083039411474",
-      "100063840894133"
+      "1835778143715180",
+      "1835778143715180"
     ],
     "notes": "If enabled, only IDs in whiteListIds can use the bot."
   },
