@@ -16,7 +16,7 @@ module.exports = {
       session3: "afternoon",
       session4: "evening",
       defaultWelcomeMessage:
-        "__Assalamu Alaikum__\n═══════════════\n__𝑾𝑬𝑳𝑪𝑶𝑴𝑬 ➤ {userName}__\n\n_ᴏɴ ᴏᴜʀ {threadName}_\n_ᴡᴇ ᴀʀᴇ ᴘʟᴇᴀsᴇᴅ ᴛᴏ ᴡᴇʟᴄᴏᴍᴇ ʏᴏᴜ_\n       __!! ᴡᴇʟᴄᴏᴍᴇ !!__\n__'ʏᴏᴜ ᴀʀᴇ ᴛʜᴇ__\n        __{memberCount}ᴛʜ ᴍᴇᴍʙᴇʀ ᴏꜰ ᴛʜɪs ɢʀᴏᴜᴘ___!!\n\n___𝙰ᴅᴅᴇᴅ ʙʏ : {inviterName}___\n\n𝙱ᴏᴛ ᴏᴡɴᴇʀ : 𝙼ᴏʜᴀᴍᴍᴀᴅ 𝚂𝙰𝙰𝙳 𝙷𝙾𝚂𝙰𝙸𝙽",
+        "__Assalamu Alaikum__\n═══════════════\n__𝑾𝑬𝑳𝑪𝑶𝑴𝑬 ➤ {userName}__\n\n_ᴏɴ ᴏᴜʀ {threadName}_\n_ᴡᴇ ᴀʀᴇ ᴘʟᴇᴀsᴇᴅ ᴛᴏ ᴡᴇʟᴄᴏᴍᴇ ʏᴏᴜ_\n       __!! ᴡᴇʟᴄᴏᴍᴇ !!__\n__'ʏᴏᴜ ᴀʀᴇ ᴛʜᴇ__\n        __{memberCount}ᴛʜ ᴍᴇᴍʙᴇʀ ᴏꜰ ᴛʜɪs ɢʀᴏᴜᴘ___!!\n\n___𝙰ᴅᴅᴇᴅ ʙʏ : {inviterName}___\n\n𝙱ᴏᴛ ᴏᴡɴᴇʀ : 𝙼ᴅ 𝚂𝙰𝙰𝙳 𝙷𝙾𝚂𝙰𝙸𝙽",
       botAddedMessage:
         "━━━━━━━━━━━━━━━━━━━\n🤖 ᴛʜᴀɴᴋ ʏᴏᴜ ғᴏʀ ᴀᴅᴅɪɴɢ ᴍᴇ ᴛᴏ ᴛʜᴇ ɢʀᴏᴜᴘ! 💖\n\n⚙️ ʙᴏᴛ ᴘʀᴇꜰɪx : /\n📜 ᴛʏᴘᴇ /help ᴛᴏ sᴇᴇ ᴀʟʟ ᴄᴏᴍᴍᴀɴᴅs\n\n✨ ʟᴇᴛ's ᴍᴀᴋᴇ ᴛʜɪs ɢʀᴏᴜᴘ ᴇᴠᴇɴ ᴍᴏʀᴇ ꜰᴜɴ ᴛᴏɢᴇᴛʜᴇʀ! 😄\n━━━━━━━━━━━━━━━━━━━"
     }
