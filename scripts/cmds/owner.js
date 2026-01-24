@@ -21,7 +21,7 @@ module.exports = {
 │ 👤 Nᴀᴍᴇ       : 𝙼𝙳 𝚂𝙰𝙰𝙳 𝙷𝙾𝚂𝙰𝙸𝙽
 │ 🧸 Nɪᴄᴋ       : 𝚂𝙰𝙰𝙳
 │ 🎂 Aɢᴇ        : 19+
-│ 💘 Rᴇʟᴀᴛɪᴏɴ : Sɪɴɢʟᴇ
+│ 💘 Rᴇʟᴀᴛɪᴏɴ : Mɪɴɢʟᴇ
 │ 🏠 Sinajgong Bangladesh 
 ├─ 🔗 Cᴏɴᴛᴀᴄᴛ ─╮
 │ 📘 Facebook  :https://www.facebook.com/share/185KUbutjn/
@@ -34,7 +34,7 @@ module.exports = {
 
     if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir);
 
-    const imgLink = "https://i.imgur.com/rCKGqV8.jpeg";
+    const imgLink = "https://i.imgur.com/xxSygLi.jpeg";
 
     const send = () => {
       api.sendMessage(
