@@ -33,8 +33,8 @@ module.exports = {
     if (!TRIGGERS.some(t => text.includes(t))) return;
 
     const REPLIES = [
-      " ওরে মেনশন দিস না গফ রে নিয়া চিপায় গেছে 😩🐸",
-      "বস এক আবাল তুমারে ডাকতেছে 😂😏"
+      "বস এক আবাল তুমারে ডাকতেছে 🫡",
+      "বস এক আবাল তুমারে ডাকতেছে 😂😒"
     ];
 
     const randomReply = REPLIES[Math.floor(Math.random() * REPLIES.length)];
