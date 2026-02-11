@@ -25,8 +25,9 @@ module.exports = {
       "Saad",
       ".saad",
       "সাদ",
-      "saad",
-      "saad"
+      "সন্ন্যাসী",
+      "saad" 
+      "@সন্ন্যাসী 😇"
     ].map(t => t.toLowerCase());
 
     const text = body.toLowerCase();
