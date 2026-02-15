@@ -18,8 +18,8 @@ module.exports = {
 
     const TRIGGERS = [
       "@everyone ",
-      "@everyone",
-      "@everyone",
+      "everyone",
+      "everyone",
       "@everyone",
       "@everyone",
       "@everyone",
