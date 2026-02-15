@@ -1,4 +1,4 @@
--cmd install intro.js const axios = require("axios");
+const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 
@@ -11,26 +11,22 @@ async function downloadFile(url, outPath) {
 module.exports = {
   config: {
     name: "intro",
-    version: "1.0.1",
+    version: "1.0.3",
     author: "Washiq",
     role: 0,
     category: "utility",
-    shortDescription: "Send intro image without prefix",
-    longDescription: "Sends a preset image when someone types intro (no prefix)",
+    shortDescription: "Send intro image",
+    longDescription: "Send intro image and mention replied user",
     countDown: 0,
   },
 
-  // ✅ Required by GoatBot v2 installer
-  onStart: async function ({ api, event }) {
-    // If someone uses prefix command, you can optionally send the image too:
-    // Example: /intro
-    const { threadID } = event;
-    return api.sendMessage("Type 'intro' without prefix to get the intro image.", threadID);
+  // ✅ Required for GoatBot installer
+  onStart: async function () {
+    return;
   },
 
-  // ✅ No prefix needed
   onChat: async function ({ api, event }) {
-    const { threadID, body } = event;
+    const { threadID, body, messageReply } = event;
     if (!body) return;
 
     const text = body.trim().toLowerCase();
@@ -39,25 +35,45 @@ module.exports = {
     const imageUrl = "https://files.catbox.moe/kdkocu.jpg";
 
     const cacheDir = path.join(__dirname, "cache");
-    try {
-      if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir);
-    } catch {}
+    if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir);
 
     const filePath = path.join(cacheDir, `intro_${Date.now()}.jpg`);
 
     try {
       await downloadFile(imageUrl, filePath);
 
-      await api.sendMessage(
-        { attachment: fs.createReadStream(filePath) },
-        threadID
-      );
-    } catch {
+      
+      if (messageReply) {
+        const userID = messageReply.senderID;
+        const userInfo = await api.getUserInfo(userID);
+        const userName = userInfo[userID].name;
+
+        await api.sendMessage(
+          {
+            body: `${userName}\nনতুন মুখ দেখতাছি পরিচয়টা দে আবাল ....👉🏻🤏🏻😫😫`,
+            mentions: [
+              {
+                tag: userName,
+                id: userID,
+              },
+            ],
+            attachment: fs.createReadStream(filePath),
+          },
+          threadID
+        );
+      } else {
+        
+        await api.sendMessage(
+          {
+            attachment: fs.createReadStream(filePath),
+          },
+          threadID
+        );
+      }
+    } catch (err) {
       await api.sendMessage("Failed to send the intro image.", threadID);
     } finally {
-      try {
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-      } catch {}
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     }
   },
 };
