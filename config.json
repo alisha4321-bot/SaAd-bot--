@@ -1,7 +1,7 @@
 {
   "facebookAccount": {
     "email": "",
-    "password": "",
+    "password": "1234",
     "2FASecret": "",
     "i_user": "",
     "proxy": null,
@@ -25,7 +25,7 @@
   "reactUnsend": {
     "enable": true,
     "onlyAdmin": true,
-    "emojis": ["🐸", "🤬"],
+    "emojis": ["👎", "👎"],
     "notes": "If enable = true, bot will unsend any message reacted with these emojis. If onlyAdmin = true, only adminBot IDs can trigger it."
   },
   "whiteListMode": {
@@ -42,8 +42,8 @@
     "notes": "If enabled, only threads in whiteListThreadIds can use the bot."
   },
   "database": {
-    "type": "sqlite",
-    "uriMongodb": "",
+    "type": "mongodb",
+    "uriMongodb": "mongodb+srv://unknown2025t_db_user:Uz3HXFI3v9w6x8kz@cluster0.0d9f3qw.mongodb.net/?appName=Cluster0",
     "autoSyncWhenStart": false,
     "autoRefreshThreadInfoFirstTime": true,
     "notes": "Recommended using 'mongodb' or 'sqlite'."
