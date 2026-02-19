@@ -18,7 +18,8 @@ module.exports = {
   onStart: async function ({ api, event }) {
     const ownerText = 
 `╭─ 👑 Oᴡɴᴇʀ Iɴғᴏ 👑 ─╮
-│ 👤 Nᴀᴍᴇ       : 𝙼𝙳 𝚂𝙰𝙰𝙳 𝙷𝙾𝚂𝙰𝙸𝙽
+│ 👤 Nᴀᴍᴇ       : 𝙼𝙳 𝚂𝙰𝙰𝙳 
+|                  𝙷𝙾𝚂𝙰𝙸𝙽
 │ 🧸 Nɪᴄᴋ       : 𝚂𝙰𝙰𝙳
 │ 🎂 Aɢᴇ        : 18+
 │ 💘 Rᴇʟᴀᴛɪᴏɴ : Mɪɴɢʟᴇ
@@ -34,7 +35,7 @@ module.exports = {
 
     if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir);
 
-    const imgLink = "https://i.imgur.com/xxSygLi.jpeg";
+    const imgLink = "https://i.imgur.com/ROa9Dxn.jpeg";
 
     const send = () => {
       api.sendMessage(
