@@ -2,152 +2,150 @@ const axios = require("axios");
 const fs = require("fs-extra");
 const path = require("path");
 
-const API = "https://lyric-search-neon.vercel.app/kshitiz?keyword=";
-const CACHE = path.join(__dirname, "tiktok_cache");
-
-async function stream(url) {
-  const res = await axios({
-    url,
-    responseType: "stream",
-    timeout: 180000
-  });
-  return res.data;
-}
-
 module.exports = {
   config: {
     name: "tiktok",
-    aliases: ["tt"],
-    version: "1.1.0",
-    author: "Mᴏʜᴀᴍᴍᴀᴅ Aᴋᴀsʜ",
+    aliases: ["tt", "tik"],
+    version: "2.5",
+    author: "নাই",
+    countDown: 10,
     role: 0,
-    countDown: 5,
+    shortDescription: "Search and download TikTok videos",
+    longDescription: "Search for TikTok videos. Use '/tiktok <query>' for auto-best video or '/tiktok s <query>' to select from a list.",
     category: "media",
-    description: {
-      en: "Search & download TikTok video"
-    },
-    guide: {
-      en: "{pn} <keyword>"
-    }
+    guide: "{pn} <query> - Auto send first video\n{pn} s <query> - Show list to select"
   },
 
-  onStart: async function ({ api, event, args, commandName }) {
-    const query = args.join(" ");
-    if (!query) {
-      return api.sendMessage(
-        "❌ 𝐒ᴇᴀʀᴄʜ 𝐊ᴇʏᴡᴏʀᴅ 𝐃ᴀᴏ!",
-        event.threadID,
-        event.messageID
-      );
+  onStart: async function ({ api, event, args, message }) {
+    if (args.length === 0) {
+      return message.reply("⚠️ Please provide a search query.\nExample: /tiktok anime edits");
     }
 
-    api.sendMessage(
-      `🔎 𝐒ᴇᴀʀᴄʜɪɴɢ 𝐓ɪᴋᴛᴏᴋ...\n🔍 𝐊ᴇʏᴡᴏʀᴅ: ❝ ${query} ❞`,
-      event.threadID
-    );
+    const isSearchMode = args[0].toLowerCase() === "s";
+    const query = isSearchMode ? args.slice(1).join(" ") : args.join(" ");
+
+    if (!query) {
+      return message.reply("⚠️ Please provide a query after 's'.\nExample: /tiktok s funny cat");
+    }
 
     try {
-      const res = await axios.get(API + encodeURIComponent(query));
-      const results = res.data.slice(0, 6);
+      const apiUrl = `https://short-video-api-by-arafat.vercel.app/arafat?keyword=${encodeURIComponent(query)}`;
+      const { data } = await axios.get(apiUrl);
 
-      if (!results.length) {
-        return api.sendMessage(
-          "❌ 𝐍ᴏ 𝐕ɪᴅᴇᴏ 𝐅ᴏᴜɴᴅ!",
-          event.threadID
-        );
+      if (!data || data.length === 0) {
+        return message.reply("❌ No results found on TikTok.");
       }
 
-      let body = "✨ 𝐓ɪᴋᴛᴏᴋ 𝐑ᴇsᴜʟᴛs ✨\n\n";
-      const imgs = [];
+      const cacheDir = path.join(__dirname, "cache");
+      await fs.ensureDir(cacheDir);
 
-      results.forEach((v, i) => {
-        body += `${i + 1}️⃣ ${v.title.slice(0, 50)}\n`;
-        body += `👤 @${v.author.unique_id}\n`;
-        body += `⏱️ ${v.duration}s\n\n`;
-        if (v.cover) imgs.push(stream(v.cover));
-      });
+      // --- Mode 1: Search List (Select manually with 6 Pictures) ---
+      if (isSearchMode) {
+        const topVideos = data.slice(0, 6);
+        let msgBody = `📱 **TikTok Search Results**\nQuery: "${query}"\n\n`;
 
-      body += `📥 𝐑ᴇᴘʟʏ 1-${results.length} 𝐓ᴏ 𝐃ᴏᴡɴʟᴏᴀᴅ`;
+        topVideos.forEach((video, index) => {
+          msgBody += `${index + 1}. **${video.title.substring(0, 30)}...**\n`;
+          msgBody += `   👤 ${video.author.nickname} | ⏱️ ${video.duration}s\n\n`;
+        });
 
-      const atts = await Promise.all(imgs);
+        msgBody += `👉 Reply with 1-6 to download.`;
 
-      api.sendMessage(
-        { body, attachment: atts },
-        event.threadID,
-        (err, info) => {
-          if (err) return;
+        const coverPaths = [];
+        const attachmentStreams = [];
+
+        for (let i = 0; i < topVideos.length; i++) {
+          const coverPath = path.join(cacheDir, `tt_cover_${event.senderID}_${i}_${Date.now()}.jpg`);
+          try {
+            const response = await axios.get(topVideos[i].cover, { responseType: "arraybuffer" });
+            fs.writeFileSync(coverPath, Buffer.from(response.data));
+            coverPaths.push(coverPath);
+            attachmentStreams.push(fs.createReadStream(coverPath));
+          } catch (err) {
+            console.error(`Failed to download cover ${i}`, err);
+          }
+        }
+
+        return message.reply({
+            body: msgBody,
+            attachment: attachmentStreams
+        }, (err, info) => {
+          // Cleanup covers after sending
+          coverPaths.forEach(p => { try { fs.unlinkSync(p); } catch (e) {} });
 
           global.GoatBot.onReply.set(info.messageID, {
-            commandName,
-            author: event.senderID,
+            commandName: this.config.name,
             messageID: info.messageID,
-            results
+            author: event.senderID,
+            results: topVideos
           });
-        }
-      );
-    } catch (e) {
-      api.sendMessage("❌ 𝐓ɪᴋᴛᴏᴋ 𝐀ᴘɪ 𝐄ʀʀᴏʀ!", event.threadID);
+        });
+      }
+
+      // --- Mode 2: Auto Send (First Result) ---
+      const firstVideo = data[0];
+      await this.downloadAndSend(api, message, firstVideo);
+
+    } catch (error) {
+      console.error("TikTok Error:", error);
+      message.reply("❌ An error occurred while fetching data.");
     }
   },
 
-  onReply: async function ({ api, event, Reply }) {
-    const choose = parseInt(event.body);
-    if (isNaN(choose)) return;
+  onReply: async function ({ api, event, Reply, message }) {
+    const { author, results } = Reply;
+    if (event.senderID !== author) return;
 
-    const { results, messageID } = Reply;
-    if (choose < 1 || choose > results.length) {
-      return api.sendMessage(
-        `❌ 𝐈ɴᴠᴀʟɪᴅ!\n1-${results.length} 𝐃ᴀᴏ`,
-        event.threadID,
-        event.messageID
-      );
+    const choice = parseInt(event.body);
+    if (isNaN(choice) || choice < 1 || choice > results.length) {
+      return message.reply(`⚠️ Invalid choice. Please reply with 1-${results.length}.`);
     }
 
-    // ✅ SAFE UNSEND (no error)
+    const selectedVideo = results[choice - 1];
+    api.unsendMessage(Reply.messageID);
+    
+    const downloadingMsg = await message.reply(`⬇️ Downloading video, please wait...`);
+    await this.downloadAndSend(api, message, selectedVideo, downloadingMsg.messageID);
+  },
+
+  // সংশোধিত হেল্পার ফাংশন যা মডিউলের ভেতরেই রাখা হয়েছে
+  downloadAndSend: async function (api, message, video, loadingMsgID) {
+    const cacheDir = path.join(__dirname, "cache");
+    const cachePath = path.join(cacheDir, `tiktok_${Date.now()}.mp4`);
+    
     try {
-      if (messageID) await api.unsendMessage(messageID);
-    } catch (_) {}
-
-    const video = results[choose - 1];
-    await fs.ensureDir(CACHE);
-
-    const name = video.title.slice(0, 25).replace(/[^a-z0-9]/gi, "_");
-    const file = path.join(CACHE, `${Date.now()}_${name}.mp4`);
-
-    api.sendMessage(
-      `⏳ 𝐃ᴏᴡɴʟᴏᴀᴅɪɴɢ...\n🎬 ${video.title}`,
-      event.threadID
-    );
-
-    try {
-      const res = await axios({
+      await fs.ensureDir(cacheDir);
+      const response = await axios({
+        method: "GET",
         url: video.videoUrl,
-        responseType: "stream",
-        timeout: 300000
+        responseType: "stream"
       });
 
-      const w = fs.createWriteStream(file);
-      res.data.pipe(w);
+      const writer = fs.createWriteStream(cachePath);
+      response.data.pipe(writer);
 
-      await new Promise((r, e) => {
-        w.on("finish", r);
-        w.on("error", e);
+      await new Promise((resolve, reject) => {
+        writer.on("finish", resolve);
+        writer.on("error", reject);
       });
 
-      api.sendMessage(
-        {
-          body:
-            `✅ 𝐃ᴏᴡɴʟᴏᴀᴅ 𝐂ᴏᴍᴘʟᴇᴛᴇᴅ!\n\n` +
-            `🎥 ${video.title}\n` +
-            `👤 @${video.author.unique_id}\n` +
-            `⏱️ ${video.duration}s`,
-          attachment: fs.createReadStream(file)
-        },
-        event.threadID,
-        () => fs.unlinkSync(file)
-      );
-    } catch (e) {
-      api.sendMessage("❌ 𝐃ᴏᴡɴʟᴏᴀᴅ 𝐅ᴀɪʟᴇᴅ!", event.threadID);
+      if (loadingMsgID) api.unsendMessage(loadingMsgID);
+
+      await message.reply({
+        body: `✅ ${video.title}`,
+        attachment: fs.createReadStream(cachePath)
+      });
+
+    } catch (error) {
+      console.error("TikTok Download Error:", error);
+      if (loadingMsgID) api.unsendMessage(loadingMsgID);
+      message.reply("❌ Failed to download the video.");
+    } finally {
+      // ৫ সেকেন্ড পর ফাইল ডিলিট করা
+      setTimeout(() => {
+        if (fs.existsSync(cachePath)) fs.unlinkSync(cachePath);
+      }, 5000);
     }
   }
 };
+      
