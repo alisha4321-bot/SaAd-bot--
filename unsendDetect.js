@@ -2,7 +2,7 @@ module.exports = {
   config: {
     name: "unsendDetect",
     version: "1.1",
-    author: "Gemini AI",
+    author: "nai 😔",
     description: "মেসেজ ডিলিট করলে শনাক্ত করবে"
   },
 
