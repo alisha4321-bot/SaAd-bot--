@@ -4,57 +4,63 @@ module.exports = {
   config: {
     name: "ramadan",
     aliases: ["romjan", "iftar", "sehri"],
-    version: "1.0",
+    version: "1.2",
     author: "SaAd",
     countDown: 5,
     role: 0,
-    shortDescription: "Get Ramadan timing for any district in BD",
+    shortDescription: "Get Ramadan timing for BD Districts",
     longDescription: "Get today's Sehri and Iftar timing for any district in Bangladesh.",
     category: "islamic",
-    guide: "{pn} <district_name> (Example: /ramadan dhaka)"
+    guide: "{pn} <district_name> (Example: /ramadan sirajganj)"
   },
 
   onStart: async function ({ api, event, args, message }) {
-    let district = args[0];
+    let query = args.join(" ").toLowerCase().trim();
 
-    if (!district) {
-      return message.reply("⚠️ দয়া করে একটি জেলার নাম লিখুন।\nউদাহরণ: /ramadan dhaka");
+    if (!query) {
+      return message.reply("⚠️ দয়া করে একটি জেলার নাম লিখুন।\nউদাহরণ: /ramadan sirajganj");
     }
 
-    // জেলা নাম ইংরেজিতে কনভার্ট করার চেষ্টা (যদি কেউ বাংলায় লেখে)
-    const districtLower = district.toLowerCase();
+    // জেলা নামের কিছু কমন ভুল বানান বা স্পেস হ্যান্ডেল করা
+    if (query.includes("sirajganj")) query = "sirajganj";
+    if (query.includes("dhaka")) query = "dhaka";
 
     try {
-      // ইসলামিক তথ্যের জন্য একটি ওপেন API ব্যবহার করা হয়েছে
-      const apiUrl = `https://api.aladhan.com/v1/timingsByCity?city=${districtLower}&country=Bangladesh&method=1`;
+      // এই API-টি বাংলাদেশের জন্য আরও বেশি কার্যকর
+      const apiUrl = `https://api.aladhan.com/v1/timingsByAddress?address=${encodeURIComponent(query)},Bangladesh&method=1`;
       
       const response = await axios.get(apiUrl);
-      const data = response.data.data;
-
-      if (!data) {
-        return message.reply("❌ জেলার নাম খুঁজে পাওয়া যায়নি। দয়া করে সঠিক ইংরেজি নাম লিখুন।");
+      
+      if (response.data.code !== 200 || !response.data.data) {
+        return message.reply("❌ জেলার নাম খুঁজে পাওয়া যায়নি। দয়া করে সঠিক ইংরেজি বানান লিখুন।");
       }
 
+      const data = response.data.data;
       const timings = data.timings;
-      const date = data.date.readable;
-      const hijri = data.date.hijri.day + " " + data.date.hijri.month.en + " " + data.date.hijri.year;
+      const dateInfo = data.date;
 
-      // সময় ফরম্যাট ঠিক করা (সেহরি সাধারণত ফজর এর আগে হয়)
-      const msg = `🌙 **রমজান সময়সূচী ২০২৬** 🌙\n` +
-                  `📍 জেলা: ${districtLower.toUpperCase()}\n` +
-                  `📅 তারিখ: ${date}\n` +
-                  `☪️ হিজরী: ${hijri}\n` +
+      // সময়সূচী মেসেজ
+      const msg = `🌙 **রমজান ও নামাজের সময়সূচী ২০২৬** 🌙\n` +
+                  `--------------------------\n` +
+                  `📍 স্থান: ${query.toUpperCase()}, বাংলাদেশ\n` +
+                  `📅 তারিখ: ${dateInfo.readable}\n` +
+                  `☪️ হিজরী: ${dateInfo.hijri.day} ${dateInfo.hijri.month.en} ${dateInfo.hijri.year}\n` +
                   `--------------------------\n` +
                   `🍲 সেহরীর শেষ সময় (Fajr): ${timings.Fajr}\n` +
                   `🌅 ইফতারের সময় (Maghrib): ${timings.Maghrib}\n` +
                   `--------------------------\n` +
-                  `📢 সতর্কবার্তা: জেলা ভেদে ১-২ মিনিট কমবেশি হতে পারে। স্থানীয় মসজিদের সাথে মিলিয়ে নিন।`;
+                  `🕌 অন্যান্য সময়:\n` +
+                  `☀️ সূর্যোদয়: ${timings.Sunrise}\n` +
+                  `🕛 জোহর: ${timings.Dhuhr}\n` +
+                  `🕒 আসর: ${timings.Asr}\n` +
+                  `🌃 এশা: ${timings.Isha}\n\n` +
+                  `📢 জেলা ভেদে ১-৩ মিনিট সময় কমবেশি হতে পারে।`;
 
       return message.reply(msg);
 
     } catch (error) {
-      console.error("Ramadan Error:", error);
-      return message.reply("❌ তথ্য সংগ্রহ করতে সমস্যা হয়েছে। দয়া করে জেলার সঠিক ইংরেজি নাম লিখুন (যেমন: Dhaka, Rajshahi, Sylhet)।");
+      console.error("Ramadan API Error:", error);
+      return message.reply("❌ এই মুহূর্তে তথ্য পাওয়া যাচ্ছে না। দয়া করে বানান চেক করে আবার চেষ্টা করুন। (যেমন: Sirajganj, Bogura, Dhaka)");
     }
   }
 };
