@@ -1,25 +1,27 @@
 module.exports = {
   config: {
     name: "unsendDetect",
-    version: "1.0",
+    version: "1.1",
     author: "nai 😔",
     description: "মেসেজ ডিলিট করলে শনাক্ত করবে"
   },
 
   onStart: async function ({ api, event, usersData }) {
-    // চেক করা হচ্ছে মেসেজটি আনসেন্ড করা হয়েছে কি না
+    // ইভেন্ট টাইপ চেক করা হচ্ছে
     if (event.type === "message_unsend") {
       const { threadID, senderID } = event;
 
-      try {
-        // মেসেজ যে ডিলিট করেছে তার নাম সংগ্রহ করা
-        const userData = await usersData.get(senderID) || {};
-        const name = userData.name || "কেউ একজন";
+      // যদি বট নিজে মেসেজ আনসেন্ড করে তবে এটি কাজ করবে না
+      if (senderID == api.getCurrentUserID()) return;
 
-        // আপনার চাওয়া মেসেজ বডি
+      try {
+        // ইউজারের নাম সংগ্রহ
+        const name = await usersData.getName(senderID) || "কেউ একজন";
+
+        // মেসেজ বডি
         const msg = `নিগ্গা ${name}, এই মেসেজটি ডিলিট করেছে। 🐸`;
 
-        // রিপ্লাই হিসেবে পাঠানো
+        // মেসেজ পাঠানো
         return api.sendMessage(msg, threadID);
         
       } catch (error) {
