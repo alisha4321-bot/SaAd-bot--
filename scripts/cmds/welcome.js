@@ -3,7 +3,7 @@ Module.exports = {
     name: "welcome",
     aliases: ["wlcm", "swagoto"],
     version: "2.0",
-    author: "Gemini AI",
+    author: "nai 👍",
     countDown: 5,
     role: 0,
     shortDescription: "Reply or mention to welcome someone",
