@@ -5,7 +5,7 @@ module.exports = {
     name: "ramadan",
     aliases: ["romjan", "iftar", "sehri"],
     version: "1.2",
-    author: "SaAd",
+    author: "Saim",
     countDown: 5,
     role: 0,
     shortDescription: "Get Ramadan timing for BD Districts",
