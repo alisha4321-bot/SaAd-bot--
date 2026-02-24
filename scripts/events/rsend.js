@@ -4,26 +4,22 @@ const fs = require("fs-extra");
 module.exports = {
   config: {
     name: "rsend",
-    version: "3.2",
+    version: "3.3",
     author: "SaAd & Gemini",
-    description: "Recover unsent messages and media with auto-dependency"
+    description: "Recover unsent messages"
   },
 
-  onStart: async function ({ api, event }) {
-    // স্টার্টআপে কিছু করার প্রয়োজন নেই
-  },
+  onStart: async function ({ api, event }) { },
 
   onChat: async function ({ api, event, usersData }) {
     const { messageID, senderID, threadID, body: content, type, attachments } = event;
 
-    // মডিউল চেক এবং অটো-লোড
+    // মডিউল চেক (গিটহাবের জন্য জরুরি)
     let axios;
     try {
       axios = require("axios");
     } catch (e) {
-      // যদি axios না থাকে তবে এটি ইনস্টল করার নির্দেশ দিবে বা এরর হ্যান্ডেল করবে
-      console.log("Installing axios for rsend...");
-      return; 
+      return; // মডিউল না থাকলে এরর দিবে না, চুপ থাকবে
     }
 
     if (!global.logMessage) global.logMessage = new Map();
@@ -42,43 +38,33 @@ module.exports = {
 
       try {
         const name = await usersData.getName(senderID) || "Someone";
-        let msgBody = `নিগ্গা 🐸🙏 ${name}, এই মেসেজটি ডিলিট করেছে:\n\n${savedMsg.body ? `#: ${savedMsg.body}` : ""}`;
+        let msgBody = `নিগ্গা 🐸🙏 ${name}, delete a message\n\n${savedMsg.body ? `#: ${savedMsg.body}` : ""}`;
 
         const streams = [];
         const cacheDir = path.join(__dirname, "cache");
-        
         if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
 
         for (const attachment of savedMsg.attachments) {
-          const ext = attachment.type === "photo" ? "jpg" : 
-                      attachment.type === "video" ? "mp4" : 
-                      attachment.type === "audio" ? "mp3" : "bin";
-          
-          const filePath = path.join(cacheDir, `${Date.now()}_${attachment.ID}.${ext}`);
-          
           try {
+            const ext = attachment.type === "photo" ? "jpg" : 
+                        attachment.type === "video" ? "mp4" : 
+                        attachment.type === "audio" ? "mp3" : "bin";
+            
+            const filePath = path.join(cacheDir, `${Date.now()}_${attachment.ID}.${ext}`);
             const response = await axios.get(attachment.url, { responseType: "arraybuffer" });
             fs.writeFileSync(filePath, Buffer.from(response.data));
             streams.push(fs.createReadStream(filePath));
-          } catch (err) {
-            console.error("Attachment download error:", err);
-          }
+          } catch (e) { continue; }
         }
 
-        await api.sendMessage({
-          body: msgBody,
-          attachment: streams
-        }, threadID);
+        await api.sendMessage({ body: msgBody, attachment: streams }, threadID);
 
-        // ফাইল পাঠানোর পর ৫ সেকেন্ড পর ডিলিট হবে যাতে কোনো এরর না আসে
         setTimeout(() => {
-          streams.forEach(stream => {
-            if (fs.existsSync(stream.path)) fs.unlinkSync(stream.path);
-          });
+          streams.forEach(stream => { if (fs.existsSync(stream.path)) fs.unlinkSync(stream.path); });
         }, 5000);
 
       } catch (error) {
-        console.error("Unsend Recovery Error:", error);
+        console.error("Unsend Error:", error);
       }
     }
   }
