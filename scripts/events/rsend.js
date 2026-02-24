@@ -4,7 +4,7 @@ const path = require("path");
 
 module.exports = {
   config: {
-    name: "resend",
+    name: "rsend",
     version: "3.0",
     author: "SaAd / Gemini",
     description: "Recover unsent messages and media"
@@ -32,7 +32,7 @@ module.exports = {
 
       try {
         const name = await usersData.getName(senderID) || "Someone";
-        let msgBody = `নিগ্গা ${name}, delete a massage 🐸\n\n${savedMsg.body ?`#: ${savedMsg.body}` : ""}`;
+        let msgBody = `sir 🐸 ${name}, delete a massage \n\n${savedMsg.body ?`#: ${savedMsg.body}` : ""}`;
 
         const streams = [];
         const cacheDir = path.join(__dirname, "cache");
