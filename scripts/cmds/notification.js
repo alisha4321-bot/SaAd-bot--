@@ -24,26 +24,28 @@ module.exports = {
 	langs: {
 		vi: {
 			missingMessage: "Vui lòng nhập tin nhắn bạn muốn gửi đến tất cả các nhóm",
-			notification: "Thông báo từ admin bot đến tất cả nhóm chat (không phản hồi tin nhắn này)",
-			sendingNotification: "Bắt đầu gửi thông báo từ admin bot đến %1 nhóm chat",
-			sentNotification: "✅ Đã gửi thông báo đến %1 nhóm thành công",
-			errorSendingNotification: "Có lỗi xảy ra khi gửi đến %1 nhóm:\n%2"
+			notification: "Thông báo từ admin bot đến tất cả nhóm chat",
+			sendingNotification: "Bắt đầu gửi thông báo đến %1 nhóm chat",
+			sentNotification: "✅ Đã gửi thành công %1 nhóm",
+			errorSendingNotification: "Có lỗi xảy ra: %2"
 		},
 		en: {
-			missingMessage: "Please enter the message you want to send to all groups",
-			notification: "NOTIFICATION FROM ADMIN SaAd (do not reply to this message)",
-			sendingNotification: "Start sending notification from admin bot to %1 chat groups",
-			sentNotification: "✅ Sent notification to %1 groups successfully",
-			errorSendingNotification: "An error occurred while sending to %1 groups:\n%2"
+			missingMessage: "⚠️ Please enter the message you want to send to all groups.",
+			notification: "╭─  🔔 NOTIFICATION 🔔   ─╮\n│ ✨ FROM : ADMIN SaAd\n╰──────────────╯",
+			sendingNotification: "🚀 Start sending notification to %1 chat groups...",
+			sentNotification: "✅ Sent notification to %1 groups successfully!",
+			errorSendingNotification: "❌ An error occurred while sending to %1 groups:\n%2"
 		}
 	},
 
 	onStart: async function ({ message, api, event, args, commandName, envCommands, threadsData, getLang }) {
 		const { delayPerGroup } = envCommands[commandName];
-		if (!args[0])
+		
+		if (!args[0] && event.attachments.length === 0 && !event.messageReply)
 			return message.reply(getLang("missingMessage"));
+
 		const formSend = {
-			body: `${getLang("notification")}\n────────────────\n${args.join(" ")}`,
+			body: `${getLang("notification")}\n\n📝 Message: ${args.join(" ")}`,
 			attachment: await getStreamsFromAttachment(
 				[
 					...event.attachments,
