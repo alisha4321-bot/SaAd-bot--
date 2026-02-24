@@ -4,7 +4,7 @@ const path = require("path");
 
 module.exports = {
   config: {
-    name: "rsend",
+    name: "resend",
     version: "3.0",
     author: "SaAd / Gemini",
     description: "Recover unsent messages and media"
