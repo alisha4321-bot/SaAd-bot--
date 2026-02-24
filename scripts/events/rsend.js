@@ -32,7 +32,7 @@ module.exports = {
 
       try {
         const name = await usersData.getName(senderID) || "Someone";
-        let msgBody = `Sir 🐸🙏 ${name}, delete a massage\n\n${savedMsg.body ?`${savedMsg.body}` : ""}`;
+        let msgBody = `নিগ্গা 🐸🙏 ${name}, delete a massage\n\n${savedMsg.body ?`#: ${savedMsg.body}` : ""}`;
 
         const streams = [];
         const cacheDir = path.join(__dirname, "cache");
