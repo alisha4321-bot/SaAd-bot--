@@ -1,7 +1,7 @@
 module.exports = {
 	config: {
 		name: "resend",
-		version: "5.0",
+		version: "5.5",
 		author: "Sadman Anik",
 		countDown: 1,
 		role: 2,
@@ -13,49 +13,54 @@ module.exports = {
 		},
 		category: "Admins",
 		guide: {
-			en :"{pn} on or off\nex: {pn} on"
-		},
-		envConfig: {
-			deltaNext: 5
+			en: "{pn} mam/man\nex: {pn} mam"
 		}
 	},
-
 
 	onStart: async function ({ api, message, event, threadsData, args }) {
-let resend = await threadsData.get(event.threadID, "settings.reSend");
-
-			//console.log(resend)
-		if(resend === undefined){
-			await threadsData.set(event.threadID, true, "settings.reSend");
-		}
-		//console.log(await threadsData.get(event.threadID, "settings.reSend"))
 		if (!["mam", "man"].includes(args[0]))
-			return message.reply("Bad")
-		await threadsData.set(event.threadID, args[0] === "mam", "settings.reSend");
-		console.log(await threadsData.get(event.threadID, "settings.reSend"))
-		if(args[0] == "mam"){
-			if(!global.reSend.hasOwnProperty(event.threadID)){
-		global.reSend[event.threadID] = []
+			return message.reply("দয়া করে সঠিক অপশন দিন: mam (অন) অথবা man (অফ)");
+
+		const isEnable = args[0] === "mam";
+		await threadsData.set(event.threadID, isEnable, "settings.reSend");
+
+		if (isEnable) {
+			if (!global.reSend) global.reSend = {};
+			if (!global.reSend[event.threadID]) global.reSend[event.threadID] = [];
+			
+			const history = await api.getThreadHistory(event.threadID, 50);
+			global.reSend[event.threadID] = history;
 		}
-		global.reSend[event.threadID] = await api.getThreadHistory(event.threadID, 100, undefined)
-}
-		return message.reply(`${args[0] === "mam" ? "Hello" : "Sup"}`);
+
+		return message.reply(`Anti-Unsend ${isEnable ? "চালু হয়েছে (Hello)" : "বন্ধ হয়েছে (Sup)"}`);
 	},
 
-onChat: async function ({ api, threadsData, usersData, event, message }) {
-	if(event.type !== "message_unsend"){
-		let resend = await threadsData.get(event.threadID, "settings.reSend");
-		if (!resend)
-			return;
+	onChat: async function ({ api, threadsData, usersData, event, message }) {
+		if (!global.reSend) global.reSend = {};
+		if (!global.reSend[event.threadID]) global.reSend[event.threadID] = [];
 
-		if(!global.reSend.hasOwnProperty(event.threadID)){
-		global.reSend[event.threadID] = []
-		}
-		global.reSend[event.threadID].push(event)
+		const resendStatus = await threadsData.get(event.threadID, "settings.reSend");
 
-	if(global.reSend.length >50){
-		global.reSend.shift()
+		if (event.type === "message_unsend") {
+			if (!resendStatus) return;
+
+			const msgData = global.reSend[event.threadID].find(item => item.messageID === event.messageID);
+			if (!msgData) return;
+
+			const userData = await usersData.get(msgData.senderID);
+			const name = userData ? userData.name : "ইউজার";
+
+			if (msgData.body) {
+				return message.send(`${name} এই মেসেজটি আনসেন্ড করেছে:\n\n"${msgData.body}"`);
+			}
+		} else {
+			if (!resendStatus) return;
+			
+			global.reSend[event.threadID].push(event);
+
+			if (global.reSend[event.threadID].length > 50) {
+				global.reSend[event.threadID].shift();
 			}
 		}
 	}
-}
+};
