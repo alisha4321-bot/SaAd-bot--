@@ -1,13 +1,13 @@
-.event install leave.js const { getTime, drive } = global.utils;
-const axios = require("axios");
-const fs = require("fs-extra");
-const path = require("path");
+const { getTime, drive } = global.utils;
+const axios = require("axios"); 
+const fs = require("fs-extra"); 
+const path = require("path"); 
 
 module.exports = {
 	config: {
 		name: "leave",
 		version: "1.4",
-		author: "NTKhang/SaAd",
+		author: "NTKhang/ SaAd",
 		category: "events"
 	},
 
@@ -42,15 +42,45 @@ module.exports = {
 				const { leftParticipantFbId } = event.logMessageData;
 				if (leftParticipantFbId == api.getCurrentUserID())
 					return;
+				const hours = getTime("HH");
+
+				const threadName = threadData.threadName;
 				const userName = await usersData.getName(leftParticipantFbId);
 
-				const isSelfLeave = leftParticipantFbId == event.author;
-				const videoUrl = isSelfLeave ? "https://files.catbox.moe/enjbh3.mp4" : "https://files.catbox.moe/iscfll.mp4";
-				const customBody = isSelfLeave ? `কি মজা এই নালায়েক লিভ নিছে 🐸😁 👉🏻 ${userName} ` : `${userName} জাহ শালা আবলামি করস কেনো kick খা 🙄🦵🏻`;
+				let { leaveMessage = getLang("defaultLeaveMessage") } = threadData.data;
+				const form = {
+					mentions: leaveMessage.match(/\{userNameTag\}/g) ? [{
+						tag: userName,
+						id: leftParticipantFbId
+					}] : null
+				};
 
-				const form = { body: customBody };
+				leaveMessage = leaveMessage
+					.replace(/\{userName\}|\{userNameTag\}/g, userName)
+					.replace(/\{type\}/g, leftParticipantFbId == event.author ? getLang("leaveType1") : getLang("leaveType2"))
+					.replace(/\{threadName\}|\{boxName\}/g, threadName)
+					.replace(/\{time\}/g, hours)
+					.replace(/\{session\}/g, hours <= 10 ?
+						getLang("session1") :
+						hours <= 12 ?
+							getLang("session2") :
+							hours <= 18 ?
+								getLang("session3") :
+								getLang("session4")
+					);
 
+				form.body = leaveMessage;
+
+				if (leaveMessage.includes("{userNameTag}")) {
+					form.mentions = [{
+						id: leftParticipantFbId,
+						tag: userName
+					}];
+				}
+
+				
 				try {
+					const videoUrl = leftParticipantFbId == event.author ? "https://files.catbox.moe/enjbh3.mp4" : "https://files.catbox.moe/iscfll.mp4";
 					const cacheDir = path.join(__dirname, "cache");
 					if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
 					const videoPath = path.join(cacheDir, `leave_${Date.now()}.mp4`);
@@ -63,8 +93,21 @@ module.exports = {
 					setTimeout(() => { if (fs.existsSync(videoPath)) fs.unlinkSync(videoPath); }, 10000);
 					return; 
 				} catch (e) {
-					message.send(form);
+					
 				}
+				
+
+				if (threadData.data.leaveAttachment) {
+					const files = threadData.data.leaveAttachment;
+					const attachments = files.reduce((acc, file) => {
+						acc.push(drive.getFile(file, "stream"));
+						return acc;
+					}, []);
+					form.attachment = (await Promise.allSettled(attachments))
+						.filter(({ status }) => status == "fulfilled")
+						.map(({ value }) => value);
+				}
+				message.send(form);
 			};
 	}
 };
