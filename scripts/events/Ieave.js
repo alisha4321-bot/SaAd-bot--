@@ -5,7 +5,7 @@ const path = require("path");
 module.exports = {
 	config: {
 		name: "leave",
-		version: "1.9",
+		version: "2.1",
 		author: "NTKhang / SaAd",
 		category: "events"
 	},
@@ -27,13 +27,15 @@ module.exports = {
 					let msgBody = "";
 					let videoUrl = "";
 
-					if (leftParticipantFbId == author) {
+					// উন্নত চেক: String এ কনভার্ট করে তুলনা করা (যাতে আইডি ম্যাচিং এ ভুল না হয়)
+					if (String(leftParticipantFbId) === String(author)) {
+						// ১. এটি লিভ (Self Left)
 						msgBody = `কি মজা ${userName} এই নালায়েক লিভ নিছে 🐸👋`;
-						videoUrl = "https://i.imgur.com/A8YI7Ql.mp4"; 
+						videoUrl = "https://files.catbox.moe/enjbh3.mp4"; 
 					} else {
-						const authorName = await usersData.getName(author) || "Admin";
+						// ২. এটি কিক (Kicked Out)
 						msgBody = `${userName} জা শালা আবাল 🙄🦵🏻`;
-						videoUrl = "https://i.imgur.com/DMx7VW2.mp4"; 
+						videoUrl = "https://files.catbox.moe/iscfll.mp4"; 
 					}
 
 					const cacheDir = path.join(__dirname, "cache");
@@ -56,23 +58,21 @@ module.exports = {
 								attachment: fs.createReadStream(videoPath)
 							});
 						} catch (sendError) {
-							console.error("Failed to send message with attachment:", sendError);
+							console.error("Failed to send message:", sendError);
 						}
 
+						// পাঠানোর ১০ সেকেন্ড পর ডিলিট
 						setTimeout(() => {
 							if (fs.existsSync(videoPath)) fs.unlinkSync(videoPath);
 						}, 10000);
 					});
 
-					writer.on('error', (err) => {
-						console.error("Stream Writer Error:", err);
-					});
-
 				} catch (err) {
-					console.error("Leave/Kick Event Error:", err);
-					message.send(`Someone left the group, but there was an error loading the video.`);
+					console.error("Leave/Kick Error:", err);
+					message.send(`Notification: User left or was kicked out.`);
 				}
 			};
 		}
 	}
 };
+						
