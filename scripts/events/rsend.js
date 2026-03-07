@@ -3,66 +3,88 @@ const fs = require("fs-extra");
 const path = require("path");
 
 module.exports = {
-    config: {
-        name: "rsend",
-        version: "1.0",
-        author: "NTKhang/SaAd",
-        category: "events"
-    },
+	config: {
+		name: "rsend",
+		version: "2.0",
+		author: "NTKhang / SaAd",
+		category: "events"
+	},
 
-    onStart: async () => {
-        if (!global.logMessage) global.logMessage = new Map();
-    },
+	onStart: async () => {
+		if (!global.rsendLog) global.rsendLog = new Map();
+	},
 
-    onEvent: async ({ event, api, usersData }) => {
-        if (!global.logMessage) global.logMessage = new Map();
+	onEvent: async ({ event, api, usersData }) => {
 
-        // মেসেজ লগিং (টেক্সট এবং অ্যাটাচমেন্ট)
-        if (event.type === "message" || event.type === "message_reply") {
-            global.logMessage.set(event.messageID, {
-                body: event.body || "",
-                attachments: event.attachments || [],
-                senderID: event.senderID
-            });
-        }
+		if (!global.rsendLog) global.rsendLog = new Map();
 
-        // আনসেন্ড ইভেন্ট ডিটেকশন
-        if (event.type === "message_unsend") {
-            const savedMsg = global.logMessage.get(event.messageID);
-            if (!savedMsg || savedMsg.senderID == api.getCurrentUserID()) return;
+		// Save message
+		if (event.type === "message" || event.type === "message_reply") {
+			global.rsendLog.set(event.messageID, {
+				body: event.body || "",
+				attachments: event.attachments || [],
+				senderID: event.senderID
+			});
+		}
 
-            const name = await usersData.getName(savedMsg.senderID) || "Someone";
-            let msgBody = `${name}, nigga 🐸 delete a message 👉🏻\n\n${savedMsg.body ? savedMsg.body : "কিছুই লেখে নাই!"}`;
+		// Detect unsend
+		if (event.type === "message_unsend") {
 
-            const form = { body: msgBody };
-            const cacheDir = path.join(__dirname, "cache");
-            if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
+			const data = global.rsendLog.get(event.messageID);
+			if (!data || data.senderID == api.getCurrentUserID()) return;
 
-            const attachments = [];
-            if (savedMsg.attachments && savedMsg.attachments.length > 0) {
-                for (const att of savedMsg.attachments) {
-                    try {
-                        const ext = att.type === "photo" ? "jpg" : "mp4";
-                        const filePath = path.join(cacheDir, `${Date.now()}_${att.ID}.${ext}`);
-                        const response = await axios.get(att.url, { responseType: "arraybuffer" });
-                        fs.writeFileSync(filePath, Buffer.from(response.data));
-                        attachments.push(fs.createReadStream(filePath));
-                    } catch (e) { continue; }
-                }
-            }
+			const name = await usersData.getName(data.senderID) || "Someone";
 
-            form.attachment = attachments;
-            await api.sendMessage(form, event.threadID);
+			let text = `${name} nigga 🐸 delete a message 👉🏻\n\n${data.body || "কিছুই লেখে নাই!"}`;
 
-            // ফাইল ক্লিনআপ
-            setTimeout(() => {
-                attachments.forEach(stream => {
-                    if (fs.existsSync(stream.path)) fs.unlinkSync(stream.path);
-                });
-            }, 10000);
+			const form = {
+				body: text,
+				mentions: [{
+					tag: name,
+					id: data.senderID
+				}]
+			};
 
-            global.logMessage.delete(event.messageID);
-        }
-    }
+			const cacheDir = path.join(__dirname, "cache");
+			if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
+
+			const files = [];
+
+			if (data.attachments.length > 0) {
+				for (const att of data.attachments) {
+					try {
+
+						let ext = "dat";
+						if (att.type === "photo") ext = "jpg";
+						else if (att.type === "video") ext = "mp4";
+						else if (att.type === "audio") ext = "mp3";
+						else if (att.type === "animated_image") ext = "gif";
+
+						const file = path.join(cacheDir, `${Date.now()}_${att.ID}.${ext}`);
+
+						const res = await axios.get(att.url, {
+							responseType: "arraybuffer"
+						});
+
+						fs.writeFileSync(file, Buffer.from(res.data));
+						files.push(fs.createReadStream(file));
+
+					} catch (err) { }
+				}
+			}
+
+			form.attachment = files;
+
+			api.sendMessage(form, event.threadID);
+
+			// auto delete cache
+			setTimeout(() => {
+				files.forEach(f => {
+					if (fs.existsSync(f.path)) fs.unlinkSync(f.path);
+				});
+			}, 15000);
+
+			global.rsendLog.delete(event.messageID);
+		}
+	}
 };
-                  
