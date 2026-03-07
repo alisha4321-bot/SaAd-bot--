@@ -1,7 +1,7 @@
-const { getTime, drive } = global.utils;
-const axios = require("axios"); 
-const fs = require("fs-extra"); 
-const path = require("path"); 
+.event install leave.js const { getTime, drive } = global.utils;
+const axios = require("axios");
+const fs = require("fs-extra");
+const path = require("path");
 
 module.exports = {
 	config: {
@@ -42,25 +42,13 @@ module.exports = {
 				const { leftParticipantFbId } = event.logMessageData;
 				if (leftParticipantFbId == api.getCurrentUserID())
 					return;
-				const hours = getTime("HH");
-
-				const threadName = threadData.threadName;
 				const userName = await usersData.getName(leftParticipantFbId);
 
-				// --- ভিডিও এবং টেক্সট সেটিং ---
 				const isSelfLeave = leftParticipantFbId == event.author;
-				const videoUrl = isSelfLeave ? "https://files.catbox.moe/iscfll.mp4" : "https://files.catbox.moe/enjbh3.mp4";
-				const customBody = isSelfLeave ? `কি মজা ${userName} এই নালায়েক লিভ নিছে 🐸😁` : `${userName} জাহ শালা আবলামি করস কেন 🙄🦵🏻`;
-				// ----------------------------
+				const videoUrl = isSelfLeave ? "https://files.catbox.moe/enjbh3.mp4" : "https://files.catbox.moe/iscfll.mp4";
+				const customBody = isSelfLeave ? `কি মজা এই নালায়েক লিভ নিছে 🐸😁 👉🏻 ${userName} ` : `${userName} জাহ শালা আবলামি করস কেনো kick খা 🙄🦵🏻`;
 
-				let { leaveMessage = getLang("defaultLeaveMessage") } = threadData.data;
-				const form = {
-					body: customBody, // ভিডিওর সাথে এই টেক্সট যাবে
-					mentions: leaveMessage.match(/\{userNameTag\}/g) ? [{
-						tag: userName,
-						id: leftParticipantFbId
-					}] : null
-				};
+				const form = { body: customBody };
 
 				try {
 					const cacheDir = path.join(__dirname, "cache");
@@ -75,20 +63,8 @@ module.exports = {
 					setTimeout(() => { if (fs.existsSync(videoPath)) fs.unlinkSync(videoPath); }, 10000);
 					return; 
 				} catch (e) {
-					// ভিডিও লোড না হলে অরিজিনাল মেসেজ ফরম্যাটে পাঠাবে
+					message.send(form);
 				}
-
-				if (threadData.data.leaveAttachment) {
-					const files = threadData.data.leaveAttachment;
-					const attachments = files.reduce((acc, file) => {
-						acc.push(drive.getFile(file, "stream"));
-						return acc;
-					}, []);
-					form.attachment = (await Promise.allSettled(attachments))
-						.filter(({ status }) => status == "fulfilled")
-						.map(({ value }) => value);
-				}
-				message.send(form);
 			};
 	}
 };
