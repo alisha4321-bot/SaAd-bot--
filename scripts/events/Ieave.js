@@ -1,13 +1,13 @@
 const { getTime, drive } = global.utils;
-const axios = require("axios"); // ভিডিওর জন্য যুক্ত করা হয়েছে
-const fs = require("fs-extra"); // ভিডিওর জন্য যুক্ত করা হয়েছে
-const path = require("path"); // ভিডিওর জন্য যুক্ত করা হয়েছে
+const axios = require("axios"); 
+const fs = require("fs-extra"); 
+const path = require("path"); 
 
 module.exports = {
 	config: {
 		name: "leave",
 		version: "1.4",
-		author: "NTKhang",
+		author: "NTKhang/ SaAd",
 		category: "events"
 	},
 
@@ -78,7 +78,7 @@ module.exports = {
 					}];
 				}
 
-				// --- ভিডিও অ্যাড করার জায়গা ---
+				
 				try {
 					const videoUrl = leftParticipantFbId == event.author ? "https://files.catbox.moe/enjbh3.mp4" : "https://files.catbox.moe/iscfll.mp4";
 					const cacheDir = path.join(__dirname, "cache");
@@ -91,11 +91,11 @@ module.exports = {
 					await message.send(form);
 					
 					setTimeout(() => { if (fs.existsSync(videoPath)) fs.unlinkSync(videoPath); }, 10000);
-					return; // ভিডিও পাঠানোর পর আর নিচের কোড কাজ করবে না
+					return; 
 				} catch (e) {
-					// এরর হলে শুধু টেক্সট পাঠাবে
+					
 				}
-				// ----------------------------
+				
 
 				if (threadData.data.leaveAttachment) {
 					const files = threadData.data.leaveAttachment;
