@@ -35,8 +35,8 @@ module.exports = {
     if (!TRIGGERS.some(t => text.includes(t))) return;
 
     const REPLIES = [
-      "SaAd বস এক আবাল তুমারে ডাকতেছে 🫡",
-      "SaAd বস এক আবাল তুমারে ডাকতেছে 😂😒"
+      "SaAd বস এক আবাল তোমারে ডাকতেছে 🫡",
+      "SaAd বস এক আবাল তোমারে ডাকতেছে 😂😒"
     ];
 
     return message.reply(REPLIES[Math.floor(Math.random() * REPLIES.length)]);
