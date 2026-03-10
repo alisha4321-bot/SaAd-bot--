@@ -190,3 +190,4 @@ function drawContactless(ctx, x, y) {
     ctx.stroke();
   }
 }
+  
