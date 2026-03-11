@@ -8,17 +8,19 @@ module.exports = {
     category: "events"
   },
 
-  onStart: async ({ api, event, usersData, message }) => {
+  onStart: async ({ api, event, usersData, message, threadsData }) => {
     if (event.logMessageType !== "log:unsubscribe") return;
 
     const { threadID, logMessageData, author } = event;
     const leftID = logMessageData.leftParticipantFbId;
 
-    // যদি কেউ নিজের ইচ্ছায় লিভ নেয় (kick না)
+    // নতুন ফিচার: ON/OFF চেক
+    const threadData = await threadsData.get(threadID);
+    if (threadData.settings?.autoinvite === false) return;
+
     if (leftID === author) {
       const userName = await usersData.getName(leftID);
 
-      // Messenger-friendly bold font map
       const boldMap = {
         A: "𝗔", B: "𝗕", C: "𝗖", D: "𝗗", E: "𝗘", F: "𝗙", G: "𝗚", H: "𝗛", I: "𝗜", J: "𝗝",
         K: "𝗞", L: "𝗟", M: "𝗠", N: "𝗡", O: "𝗢", P: "𝗣", Q: "𝗤", R: "𝗥", S: "𝗦", T: "𝗧",
