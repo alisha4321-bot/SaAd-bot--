@@ -15,7 +15,7 @@ module.exports = {
 
   onStart: async function ({ args, message, event, api }) {
     // Authorized UID from your saved info
-    const allowedUIDs = ["61587367229815"]; 
+    const allowedUIDs = ["61550670293729"]; 
 
     if (!allowedUIDs.includes(event.senderID)) {
       return message.reply("❌ Permission Denied: You are not authorized to use this command.");
