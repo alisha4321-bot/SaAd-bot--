@@ -8,7 +8,7 @@ module.exports = {
     name: "cutiepie",
     aliases: ["cutiepie", "cute", "cutepie", "bandorni"], 
     version: "5.6",
-    author: "SaAd / gemini", 
+    author: "SaAd", 
     countDown: 5,
     role: 0,
     usePrefix: true,
@@ -20,7 +20,15 @@ module.exports = {
   onStart: async function ({ event, message, api, usersData }) {
     let targetID = event.type === "message_reply" ? event.messageReply.senderID : Object.keys(event.mentions)[0];
 
-    // রেনডম ফিমেল সিলেকশন লজিক
+    // যদি মেনশন বা রিপ্লাই থাকে, তবে চেক করবে সে মেয়ে কি না
+    if (targetID) {
+      const uData = await usersData.get(targetID);
+      if (uData.gender !== 1 && String(uData.gender).toLowerCase() !== "female") {
+        return message.reply("❗ This command is only for female members! 🐒");
+      }
+    }
+
+    // যদি কাউকে সিলেক্ট করা না থাকে, তবে অটোমেটিক গ্রুপ থেকে মেয়ে খুঁজবে
     if (!targetID) {
       const threadInfo = await api.getThreadInfo(event.threadID);
       const participantIDs = threadInfo.participantIDs;
@@ -39,10 +47,6 @@ module.exports = {
       const userData = await usersData.get(targetID);
       const targetName = userData.name || "Cute pie";
 
-      if (userData.gender !== 1 && String(userData.gender).toLowerCase() === "female") {
-        // ফিমেল না হলে রিটার্ন করবে না, যদি আপনার বটের ডাটাবেস ১ মানে ফিমেল হয়
-      }
-
       const waitMsg = await message.reply(`⌛ Generating a Cute Pie Grill 🎀🐍`);
 
       let avatarUrl;
@@ -55,8 +59,7 @@ module.exports = {
       const cacheDir = path.join(__dirname, "cache");
       await fs.ensureDir(cacheDir);
       
-      // আপনার দেওয়া নতুন ক্যাটবক্স লিঙ্ক
-      const monkeyImgUrl = "https://files.catbox.moe/pntf01.jpg"; 
+      const monkeyImgUrl = "https://files.catbox.moe/rvwxs7.jpg"; 
       const bgResponse = await axios.get(monkeyImgUrl, { responseType: "arraybuffer" });
       const bgImage = await loadImage(Buffer.from(bgResponse.data));
 
@@ -64,10 +67,9 @@ module.exports = {
       const ctx = canvas.getContext("2d");
       ctx.drawImage(bgImage, 0, 0);
 
-      // প্রোফাইল পিকচার ছোট করা হয়েছে (আগে ১৮০ ছিল, এখন ১৫০ করা হয়েছে)
-      const avatarSize = 150; 
+      const avatarSize = 100; // আপনার চাহিদা মতো ১০০ রাখা হয়েছে
       const headX = (bgImage.width / 2) - (avatarSize / 2); 
-      const headY = 40; // পজিশন কিছুটা উপরে সেট করা হয়েছে
+      const headY = 40; 
 
       ctx.save();
       ctx.beginPath();
@@ -79,7 +81,6 @@ module.exports = {
       const outputPath = path.join(cacheDir, `bandor_${targetID}_${Date.now()}.png`);
       await fs.writeFile(outputPath, canvas.toBuffer("image/png"));
 
-      // টেক্সট মেসেজ বডিতে রাখা হয়েছে
       await message.reply({
         body: `Hey My Cutepie Sister 🎀🐣\n${targetName}`,
         mentions: [{ tag: targetName, id: targetID }],
