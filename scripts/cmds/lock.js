@@ -1,29 +1,32 @@
-const lockedThreads = {};
-const pageID = "100067158230673"; // তোমার পেজ আইডি
+const fs = require("fs-extra");
+const path = path.join(__dirname, "cache", "lockedThreads.json");
+
+// ডাটাবেস ফাইল চেক এবং লোড করার লজিক
+if (!fs.existsSync(path)) fs.writeFileSync(path, JSON.stringify({}));
+let lockedThreads = JSON.parse(fs.readFileSync(path));
+
+const pageID = "61588425573168"; 
 
 module.exports = {
   config: {
     name: "lock",
-    version: "3.0",
-    author: "MOHAMMAD AKASH",
+    version: "3.5",
+    author: "MOHAMMAD AKASH / SaAd",
     countDown: 5,
     role: 1,
     description: "Lock/unlock group to prevent members from sending messages",
     category: "box chat"
   },
 
-  // কমান্ড হ্যান্ডলার
   onStart: async function({ api, event, args }) {
     const threadID = event.threadID;
     const senderID = event.senderID;
 
-    // থ্রেড ইনফো
     const info = await api.getThreadInfo(threadID);
     const adminIDs = info.adminIDs.map(i => i.id);
 
-    // শুধুমাত্র এডমিন
     if (!adminIDs.includes(senderID)) {
-      return api.sendMessage("❌ শুধু এডমিনরাই এই কমান্ড ব্যবহার করতে পারবে!", threadID);
+      return api.sendMessage("❌ Only group admins can use this command!", threadID);
     }
 
     const action = args[0]?.toLowerCase();
@@ -31,55 +34,50 @@ module.exports = {
     // 🔒 LOCK
     if (action === "on" || action === "lock") {
       if (lockedThreads[threadID]) 
-        return api.sendMessage("✅ গ্রুপ আগেই লক করা আছে!", threadID);
+        return api.sendMessage("✅ This group is already locked!", threadID);
 
       try {
         await api.addUserToGroup(pageID, threadID);
       } catch (e) {}
 
       lockedThreads[threadID] = true;
-      return api.sendMessage("🔒 গ্রুপ লক করা হলো! এখন কেউ মেসেজ দিতে পারবে না।", threadID);
+      fs.writeFileSync(path, JSON.stringify(lockedThreads));
+      return api.sendMessage("🔒 Group has been locked! Only admins can send messages now.", threadID);
     }
 
     // 🔓 UNLOCK
     if (action === "off" || action === "unlock") {
       if (!lockedThreads[threadID])
-        return api.sendMessage("✅ গ্রুপ আগেই আনলক আছে!", threadID);
+        return api.sendMessage("✅ This group is already unlocked!", threadID);
 
       delete lockedThreads[threadID];
+      fs.writeFileSync(path, JSON.stringify(lockedThreads));
 
-      // পেজ কিক করা
       try {
         await api.removeUserFromGroup(pageID, threadID);
-      } catch (e) {
-        console.error("❌ পেজ রিমুভ করতে সমস্যা:", e.message);
-      }
+      } catch (e) {}
 
-      return api.sendMessage("🔓 গ্রুপ আনলক করা হলো! এখন সবাই মেসেজ দিতে পারবে।", threadID);
+      return api.sendMessage("🔓 Group has been unlocked! Everyone can send messages now.", threadID);
     }
 
-    // ভুল ইনপুট
-    return api.sendMessage("❌ ব্যবহার: /lock on অথবা /lock off", threadID);
+    return api.sendMessage("❌ Usage: /lock on or /lock off", threadID);
   },
 
-  // 🔇 কেউ মেসেজ দিলে (যদি লক থাকে)
   onEvent: async function({ api, event }) {
-    const threadID = event.threadID;
-    const senderID = event.senderID;
+    const { threadID, senderID, messageID, type } = event;
 
-    if (!lockedThreads[threadID]) return;
+    if (!lockedThreads[threadID] || type !== "message") return;
 
     const info = await api.getThreadInfo(threadID);
     const adminIDs = info.adminIDs.map(i => i.id);
 
-    // এডমিন মেসেজ দিতে পারবে
-    if (adminIDs.includes(senderID)) return;
-
-    // অন্য কেউ মেসেজ দিলে ডিলিট করে দেবে
-    try {
-      await api.unsendMessage(event.messageID);
-    } catch (e) {
-      console.error(e);
+    // If not admin, unsend message
+    if (!adminIDs.includes(senderID)) {
+      try {
+        await api.unsendMessage(messageID);
+      } catch (e) {
+        console.error("Failed to unsend message:", e);
+      }
     }
   }
 };
