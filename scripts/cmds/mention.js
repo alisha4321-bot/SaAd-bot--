@@ -1,20 +1,22 @@
 module.exports = {
   config: {
     name: "mention",
-    version: "2.0.2",
+    version: "2.0.4",
     author: "Washiq",
-    countDown: 0,
+    countDown: 10,
     role: 0,
+    category: "system",
     shortDescription: "Auto reply on keywords",
-    longDescription: "Replies when specific keywords appear in message (no UID needed).",
-    category: "system"
+    longDescription: "Replies when specific keywords appear in message.",
+    usePrefix: false
   },
 
   onStart: async function () {},
 
-  onChat: async function ({ event, message }) {
-    const body = (event.body || "").trim();
-    if (!body) return;
+  onChat: async function ({ api, event, message }) {
+    if (event.senderID == api.getCurrentUserID()) return;
+    
+    if (!event.body) return;
 
     const TRIGGERS = [
       "@SaAd X ɆtaChi",
@@ -25,20 +27,22 @@ module.exports = {
       "Saad",
       ".saad",
       "সাদ",
-      "সন্ন্যাসী",
-      "saad",
-      "@সন্ন্যাসী",
-      "@সন্ন্যাসী 😇"
-    ].map(t => t.toLowerCase());
-
-    const text = body.toLowerCase();
-    if (!TRIGGERS.some(t => text.includes(t))) return;
-
-    const REPLIES = [
-      "SaAd বস এক আবাল তোমারে ডাকতেছে 🫡",
-      "SaAd বস এক আবাল তোমারে ডাকতেছে 😂😒"
+      "saad"
     ];
 
-    return message.reply(REPLIES[Math.floor(Math.random() * REPLIES.length)]);
+    const text = event.body.toLowerCase();
+    
+    const isMentioned = TRIGGERS.some(t => text.includes(t.toLowerCase()));
+
+    if (isMentioned) {
+      const REPLIES = [
+        "SaAd বস এক আবাল তোমারে ডাকতেছে 🫡",
+        "SaAd বস এক আবাল তোমারে ডাকতেছে 😂😒"
+      ];
+
+      const randomReply = REPLIES[Math.floor(Math.random() * REPLIES.length)];
+      
+      return message.reply(randomReply);
+    }
   }
 };
