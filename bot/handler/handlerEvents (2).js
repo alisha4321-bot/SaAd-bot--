@@ -8,12 +8,21 @@ function getType(obj) {
 }
 
 function getRole(threadData, senderID) {
-    const adminBot = global.GoatBot.config.adminBot || [];
-    if (!senderID)
-        return 0;
+    const config = global.GoatBot.config;
+    const creator = config.creator || [];
+    const developer = config.developer || [];
+    const adminBot = config.adminBot || [];
+    
+    if (!senderID) return 0;
     const adminBox = threadData ? threadData.adminIDs || [] : [];
-    return adminBot.includes(senderID) ? 2 : adminBox.includes(senderID) ? 1 : 0;
+    
+    if (creator.includes(senderID)) return 6;
+    if (developer.includes(senderID)) return 5;
+    if (adminBot.includes(senderID)) return 4;
+    if (adminBox.includes(senderID)) return 1;
+    return 0;
 }
+
 
 function getText(type, reason, time, targetID, lang) {
     const utils = global.utils;
