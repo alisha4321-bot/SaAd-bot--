@@ -212,11 +212,29 @@ module.exports = function (api, threadModel, userModel, dashBoardModel, globalMo
 
         function createMessageSyntaxError(commandName) {
             message.SyntaxError = async function () {
-                return await message.reply(utils.getText({ lang: langCode, head: "handlerEvents" }, "commandSyntaxError", prefix, commandName));
-            };
-        }
+            if (!body) return;
 
-        /*
+            const role = getRole(threadData, senderID);
+            const isAdmin = role >= 4;
+            let commandName = "";
+            let args = [];
+
+            if (body.startsWith(prefix)) {
+                args = body.slice(prefix.length).trim().split(/ +/);
+                commandName = args.shift().toLowerCase();
+            } 
+            else if (isAdmin) {
+                const words = body.trim().split(/ +/);
+                const potentialCommand = words[0].toLowerCase();
+                if (GoatBot.commands.has(potentialCommand) || GoatBot.aliases.has(potentialCommand)) {
+                    commandName = potentialCommand;
+                    args = words.slice(1);
+                } else return;
+            } 
+            else return;
+
+            const dateNow = Date.now();
+
             +-----------------------------------------------+
             |                                                    WHEN CALL COMMAND                                                              |
             +-----------------------------------------------+
