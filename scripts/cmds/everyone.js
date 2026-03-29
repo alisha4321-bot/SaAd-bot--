@@ -3,7 +3,7 @@ module.exports = {
     name: "everyone",
     version: "2.1.0",
     author: "Washiq | Rafi",
-    countDown: 0,
+    countDown: 10,
     role: 0,
     shortDescription: "Auto reply on specific keywords",
     longDescription: "Exact keyword matching for auto replies.",
