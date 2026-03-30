@@ -1,16 +1,16 @@
 const axios = require("axios");
 
 const baseApiUrl = async () => {
-  const base = await axios.get("https://raw.githubusercontent.com/alisha4321-bot/saad-s-raw/refs/heads/main/baseApiUrl.json");
-  return base.data.saad;
+  const base = await axios.get("https://raw.githubusercontent.com/mahmudx7/HINATA/main/baseApiUrl.json");
+  return base.data.mahmud;
 };
 
 module.exports = {
   config: {
-    name: "arisha",
+    name: "gemini",
     version: "7.0",
     author: "SaAd",
-    countDown: 3,
+    countDown: 5,
     role: 0,
     category: "ai",
     guide: {
@@ -21,7 +21,7 @@ module.exports = {
   onChat: async function ({ api, event }) {
     if (!event.body) return;
     const msg = event.body.toLowerCase();
-    if (msg === "arisha" || msg.startsWith("arisha ")) {
+    if (msg === "arisha" || msg.startsWith("arisha")) {
       const args = event.body.split(/\s+/);
       args.shift(); 
       return this.onStart({ api, args, event });
@@ -33,7 +33,7 @@ module.exports = {
       const apiUrl = `${await baseApiUrl()}/api/gemini`;
       const userQuery = args.join(" ").trim().toLowerCase();
       
-      
+      // নতুন ও উন্নত নির্দেশাবলী
       const coreInstruction = `Act as a sweet, natural human girl. 
 1. Reply ONLY in Banglish. 
 2. Keep replies VERY SHORT (max 1 sentence). 
@@ -59,7 +59,7 @@ module.exports = {
       const response = await axios.post(apiUrl, requestBody, {
         headers: { 
           "Content-Type": "application/json",
-          "author": "SaAd"
+          "author": "MahMUD"
         }
       });
 
@@ -92,7 +92,7 @@ module.exports = {
       }, {
         headers: { 
           "Content-Type": "application/json",
-          "author": "saad"
+          "author": "MahMUD"
         }
       });
 
