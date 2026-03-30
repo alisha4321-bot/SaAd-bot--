@@ -1,21 +1,15 @@
 const axios = require("axios");
 
 const baseApiUrl = async () => {
-  const base = await axios.get("https://raw.githubusercontent.com/mahmudx7/HINATA/main/baseApiUrl.json");
-  return base.data.mahmud;
+  const base = await axios.get("https://raw.githubusercontent.com/alisha4321-bot/saad-s-raw/refs/heads/main/baseApiUrl.json");
+  return base.data.saad;
 };
-
-/**
-* @author mahuud
-* @owner: SaAd
-* @modified by SaAd
-*/
 
 module.exports = {
   config: {
-    name: "gemini",
+    name: "arisha",
     version: "7.0",
-    author: "MahMud / modified by SaAd",
+    author: "SaAd",
     countDown: 3,
     role: 0,
     category: "ai",
@@ -98,7 +92,7 @@ module.exports = {
       }, {
         headers: { 
           "Content-Type": "application/json",
-          "author": "MahMUD"
+          "author": "saad"
         }
       });
 
